@@ -1,6 +1,8 @@
 package Sources;
 
+import Sources.Views.Menu.MenuCtrl;
 import Util.Errors;
+import Util.HibernateUtil;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -10,13 +12,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -29,6 +35,9 @@ public class Main extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
 
+    Session session = HibernateUtil.getSessionFactory().openSession();
+    Query query;
+
     private static Logger logger = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) {
@@ -37,6 +46,7 @@ public class Main extends Application {
                     Main.class.getResourceAsStream("/logging.properties")
             );
         } catch (IOException e) {
+            logger.log(Level.SEVERE, "Exception: ", e);
             Errors.showGlobalException(e, false);
         }
         launch(args);
@@ -47,7 +57,8 @@ public class Main extends Application {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("GoogleMapsDirectionApplication");
 //        this.primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("Views/Img/App.png")));
-
+        session.beginTransaction();
+//        query = session.createQuery("from")
         initRootLayout();
     }
 
@@ -60,7 +71,7 @@ public class Main extends Application {
             login();
             primaryStage.show();
         } catch (IOException e) {
-
+            logger.log(Level.SEVERE, "Exception: ", e);
         }
     }
 
@@ -99,7 +110,17 @@ public class Main extends Application {
         });
         Optional<Pair<String, String>> result = dialog.showAndWait();
         result.ifPresent(person -> {
-            
+            session.beginTransaction();
+
+            try {
+                FXMLLoader loader = new FXMLLoader();
+                BorderPane pane = loader.load(getClass().getResourceAsStream("Views/Menu/Menu.fxml"));
+                rootLayout.setTop(pane);
+                MenuCtrl menuCtrl = loader.getController();
+                menuCtrl.setMain(this);
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Exception: ", e);
+            }
         });
     }
 

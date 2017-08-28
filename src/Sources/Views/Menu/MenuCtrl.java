@@ -1,5 +1,6 @@
 package Sources.Views.Menu;
 
+import Sources.Main;
 import javafx.scene.control.MenuBar;
 
 /**
@@ -9,4 +10,10 @@ import javafx.scene.control.MenuBar;
  */
 public class MenuCtrl {
     public MenuBar menuBar;
+
+    private Main main;
+
+    public void setMain(Main main) {
+        this.main = main;
+    }
 }
